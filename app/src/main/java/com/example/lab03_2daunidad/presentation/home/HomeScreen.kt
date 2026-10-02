@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -18,10 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.lab03_2daunidad.domain.model.Vehicle
 import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    vehicle: Vehicle,
+    onVehicleClick: () -> Unit
+) {
 
     Scaffold { innerPadding ->
 
@@ -45,7 +50,10 @@ fun HomeScreen() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            VehicleCard()
+            VehicleCard(
+                vehicle = vehicle,
+                onVehicleClick = onVehicleClick
+            )
 
             Text(
                 text = "Estado general",
@@ -75,7 +83,10 @@ fun HomeScreen() {
 }
 
 @Composable
-private fun VehicleCard() {
+private fun VehicleCard(
+    vehicle: Vehicle,
+    onVehicleClick: () -> Unit
+) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -98,13 +109,13 @@ private fun VehicleCard() {
             )
 
             Text(
-                text = "Toyota Corolla",
+                text = "${vehicle.brand} ${vehicle.model}",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = "2020 • ABC-123",
+                text = "${vehicle.year} • ${vehicle.plate}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -113,14 +124,29 @@ private fun VehicleCard() {
             )
 
             Text(
-                text = "Kilometraje actual"
+                text = "Kilometraje actual",
+                style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = "45,240 km",
+                text = "${vehicle.currentMileage} km",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Button(
+                onClick = onVehicleClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text(
+                    text = "Gestionar vehículo"
+                )
+            }
         }
     }
 }
@@ -202,6 +228,16 @@ private fun MaintenanceCard(
 private fun HomeScreenPreview() {
 
     LAB032DAUNIDADTheme {
-        HomeScreen()
+
+        HomeScreen(
+            vehicle = Vehicle(
+                brand = "Toyota",
+                model = "Corolla",
+                year = 2020,
+                plate = "ABC-123",
+                currentMileage = 45240
+            ),
+            onVehicleClick = {}
+        )
     }
 }

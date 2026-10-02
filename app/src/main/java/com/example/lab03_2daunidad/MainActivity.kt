@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.lab03_2daunidad.presentation.home.HomeScreen
+import com.example.lab03_2daunidad.navigation.AppNavigation
 import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,7 +17,8 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             LAB032DAUNIDADTheme {
-                HomeScreen()
+
+                AppNavigation()
             }
         }
     }
