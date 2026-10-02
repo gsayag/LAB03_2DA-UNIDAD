@@ -1,5 +1,6 @@
 package com.example.lab03_2daunidad.presentation.history
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -26,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lab03_2daunidad.domain.model.Maintenance
 import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
-import com.example.lab03_2daunidad.domain.util.calculateStatus
 import com.example.lab03_2daunidad.domain.util.calculateStatusInfo
 
 private enum class HistoryFilter {
@@ -53,6 +54,10 @@ fun HistoryScreen(
         mutableStateOf(HistoryFilter.ALL)
     }
 
+    var maintenanceToDelete by remember {
+        mutableStateOf<Maintenance?>(null)
+    }
+
     val filteredMaintenances =
         maintenances.filter { maintenance ->
 
@@ -67,14 +72,15 @@ fun HistoryScreen(
                         )
 
             val status =
-                maintenance.calculateStatus(
+                maintenance.calculateStatusInfo(
                     currentMileage = currentMileage
-                )
+                ).status
 
             val matchesFilter =
                 when (selectedFilter) {
 
-                    HistoryFilter.ALL -> true
+                    HistoryFilter.ALL ->
+                        true
 
                     HistoryFilter.OVERDUE ->
                         status == MaintenanceStatus.OVERDUE
@@ -145,7 +151,8 @@ fun HistoryScreen(
                 selected =
                     selectedFilter == HistoryFilter.ALL,
                 onClick = {
-                    selectedFilter = HistoryFilter.ALL
+                    selectedFilter =
+                        HistoryFilter.ALL
                 },
                 label = {
                     Text("Todos")
@@ -217,16 +224,71 @@ fun HistoryScreen(
                     MaintenanceHistoryCard(
                         maintenance = maintenance,
                         currentMileage = currentMileage,
+
                         onEdit = {
                             onEdit(maintenance)
                         },
+
                         onDelete = {
-                            onDelete(maintenance)
+                            maintenanceToDelete =
+                                maintenance
                         }
                     )
                 }
             }
         }
+    }
+
+    maintenanceToDelete?.let { maintenance ->
+
+        AlertDialog(
+            onDismissRequest = {
+                maintenanceToDelete = null
+            },
+
+            title = {
+                Text(
+                    text = "¿Eliminar mantenimiento?"
+                )
+            },
+
+            text = {
+                Text(
+                    text = "Se eliminará \"${maintenance.type}\" del historial. Esta acción no se puede deshacer."
+                )
+            },
+
+            confirmButton = {
+
+                TextButton(
+                    onClick = {
+
+                        onDelete(maintenance)
+
+                        maintenanceToDelete = null
+                    }
+                ) {
+
+                    Text(
+                        text = "Eliminar",
+                        color =
+                            MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+
+            dismissButton = {
+
+                TextButton(
+                    onClick = {
+                        maintenanceToDelete = null
+                    }
+                ) {
+
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -264,12 +326,14 @@ private fun MaintenanceHistoryCard(
 
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement =
+                Arrangement.spacedBy(6.dp)
         ) {
 
             Text(
                 text = maintenance.type,
-                style = MaterialTheme.typography.titleMedium,
+                style =
+                    MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
 
@@ -280,35 +344,43 @@ private fun MaintenanceHistoryCard(
 
             Text(
                 text = statusInfo.message,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style =
+                    MaterialTheme.typography.bodySmall,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Text(
-                text = "Fecha: ${maintenance.date}"
+                text =
+                    "Fecha: ${maintenance.date}"
             )
 
             Text(
-                text = "Kilometraje: ${maintenance.mileage} km"
+                text =
+                    "Kilometraje: ${maintenance.mileage} km"
             )
 
             Text(
-                text = "Costo: S/ %.2f".format(
-                    maintenance.cost
-                )
+                text =
+                    "Costo: S/ %.2f".format(
+                        maintenance.cost
+                    )
             )
 
-            maintenance.nextMileage?.let { nextMileage ->
+            maintenance.nextMileage?.let {
+                    nextMileage ->
 
                 Text(
-                    text = "Próximo kilometraje: $nextMileage km"
+                    text =
+                        "Próximo kilometraje: $nextMileage km"
                 )
             }
 
             if (maintenance.nextDate.isNotBlank()) {
 
                 Text(
-                    text = "Próxima fecha: ${maintenance.nextDate}"
+                    text =
+                        "Próxima fecha: ${maintenance.nextDate}"
                 )
             }
 
@@ -316,14 +388,17 @@ private fun MaintenanceHistoryCard(
 
                 Text(
                     text = maintenance.notes,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style =
+                        MaterialTheme.typography.bodySmall,
+                    color =
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement =
+                    Arrangement.End
             ) {
 
                 TextButton(
@@ -335,7 +410,12 @@ private fun MaintenanceHistoryCard(
                 TextButton(
                     onClick = onDelete
                 ) {
-                    Text("Eliminar")
+
+                    Text(
+                        text = "Eliminar",
+                        color =
+                            MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
