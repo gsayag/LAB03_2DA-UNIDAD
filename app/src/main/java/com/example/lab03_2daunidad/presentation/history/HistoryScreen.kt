@@ -21,6 +21,7 @@ import com.example.lab03_2daunidad.domain.model.Maintenance
 @Composable
 fun HistoryScreen(
     maintenances: List<Maintenance>,
+    onEdit: (Maintenance) -> Unit,
     onDelete: (Maintenance) -> Unit,
     onBack: () -> Unit
 ) {
@@ -53,8 +54,7 @@ fun HistoryScreen(
 
             Text(
                 text = "Todavía no tienes mantenimientos registrados.",
-                modifier = Modifier.padding(top = 32.dp),
-                style = MaterialTheme.typography.bodyLarge
+                modifier = Modifier.padding(top = 32.dp)
             )
 
         } else {
@@ -68,13 +68,14 @@ fun HistoryScreen(
 
                 items(
                     items = maintenances,
-                    key = { maintenance ->
-                        maintenance.id
-                    }
+                    key = { it.id }
                 ) { maintenance ->
 
                     MaintenanceHistoryCard(
                         maintenance = maintenance,
+                        onEdit = {
+                            onEdit(maintenance)
+                        },
                         onDelete = {
                             onDelete(maintenance)
                         }
@@ -88,6 +89,7 @@ fun HistoryScreen(
 @Composable
 private fun MaintenanceHistoryCard(
     maintenance: Maintenance,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
 
@@ -106,27 +108,23 @@ private fun MaintenanceHistoryCard(
                 fontWeight = FontWeight.Bold
             )
 
+            Text("Fecha: ${maintenance.date}")
+
             Text(
-                text = "Fecha: ${maintenance.date}"
+                "Kilometraje: ${maintenance.mileage} km"
             )
 
             Text(
-                text = "Kilometraje: ${maintenance.mileage} km"
+                "Costo: S/ %.2f".format(maintenance.cost)
             )
 
-            Text(
-                text = "Costo: S/ %.2f".format(maintenance.cost)
-            )
-
-            if (maintenance.nextMileage != null) {
-                Text(
-                    text = "Próximo: ${maintenance.nextMileage} km"
-                )
+            maintenance.nextMileage?.let {
+                Text("Próximo: $it km")
             }
 
             if (maintenance.nextDate.isNotBlank()) {
                 Text(
-                    text = "Próxima fecha: ${maintenance.nextDate}"
+                    "Próxima fecha: ${maintenance.nextDate}"
                 )
             }
 
@@ -142,6 +140,12 @@ private fun MaintenanceHistoryCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
+
+                TextButton(
+                    onClick = onEdit
+                ) {
+                    Text("Editar")
+                }
 
                 TextButton(
                     onClick = onDelete

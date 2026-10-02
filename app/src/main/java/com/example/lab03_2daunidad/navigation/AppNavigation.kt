@@ -23,6 +23,7 @@ private const val HOME_ROUTE = "home"
 private const val VEHICLE_ROUTE = "vehicle"
 private const val MAINTENANCE_ROUTE = "maintenance"
 private const val HISTORY_ROUTE = "history"
+private const val EDIT_MAINTENANCE_ROUTE = "editMaintenance"
 
 @Composable
 fun AppNavigation() {
@@ -62,8 +63,8 @@ fun AppNavigation() {
         .observeMaintenances(vehicle.id)
         .collectAsState(initial = emptyList())
 
-    val maintenances = maintenanceEntities.map { entity ->
-        entity.toDomain()
+    val maintenances = maintenanceEntities.map {
+        it.toDomain()
     }
 
     NavHost(
@@ -142,6 +143,13 @@ fun AppNavigation() {
             HistoryScreen(
                 maintenances = maintenances,
 
+                onEdit = { maintenance ->
+
+                    navController.navigate(
+                        "$EDIT_MAINTENANCE_ROUTE/${maintenance.id}"
+                    )
+                },
+
                 onDelete = { maintenance ->
 
                     coroutineScope.launch {
@@ -156,6 +164,46 @@ fun AppNavigation() {
                     navController.popBackStack()
                 }
             )
+        }
+
+        composable(
+            "$EDIT_MAINTENANCE_ROUTE/{maintenanceId}"
+        ) { backStackEntry ->
+
+            val maintenanceId =
+                backStackEntry.arguments
+                    ?.getString("maintenanceId")
+                    ?.toLongOrNull()
+
+            val maintenance =
+                maintenances.firstOrNull {
+                    it.id == maintenanceId
+                }
+
+            if (maintenance != null) {
+
+                MaintenanceScreen(
+                    vehicleId = vehicle.id,
+                    currentMileage = vehicle.currentMileage,
+                    maintenance = maintenance,
+
+                    onSave = { updatedMaintenance ->
+
+                        coroutineScope.launch {
+
+                            maintenanceDao.updateMaintenance(
+                                updatedMaintenance.toEntity()
+                            )
+
+                            navController.popBackStack()
+                        }
+                    },
+
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 }

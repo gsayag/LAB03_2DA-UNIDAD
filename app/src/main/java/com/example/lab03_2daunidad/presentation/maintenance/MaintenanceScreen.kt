@@ -16,7 +16,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -28,36 +28,48 @@ import com.example.lab03_2daunidad.domain.model.Maintenance
 fun MaintenanceScreen(
     vehicleId: Long,
     currentMileage: Int,
+    maintenance: Maintenance? = null,
     onSave: (Maintenance) -> Unit,
     onBack: () -> Unit
 ) {
 
-    var type by rememberSaveable {
-        mutableStateOf("")
+    var type by remember(maintenance?.id) {
+        mutableStateOf(maintenance?.type ?: "")
     }
 
-    var date by rememberSaveable {
-        mutableStateOf("")
+    var date by remember(maintenance?.id) {
+        mutableStateOf(maintenance?.date ?: "")
     }
 
-    var mileage by rememberSaveable {
-        mutableStateOf(currentMileage.toString())
+    var mileage by remember(maintenance?.id) {
+        mutableStateOf(
+            maintenance?.mileage?.toString()
+                ?: currentMileage.toString()
+        )
     }
 
-    var cost by rememberSaveable {
-        mutableStateOf("")
+    var cost by remember(maintenance?.id) {
+        mutableStateOf(
+            maintenance?.cost?.toString() ?: ""
+        )
     }
 
-    var nextMileage by rememberSaveable {
-        mutableStateOf("")
+    var nextMileage by remember(maintenance?.id) {
+        mutableStateOf(
+            maintenance?.nextMileage?.toString() ?: ""
+        )
     }
 
-    var nextDate by rememberSaveable {
-        mutableStateOf("")
+    var nextDate by remember(maintenance?.id) {
+        mutableStateOf(
+            maintenance?.nextDate ?: ""
+        )
     }
 
-    var notes by rememberSaveable {
-        mutableStateOf("")
+    var notes by remember(maintenance?.id) {
+        mutableStateOf(
+            maintenance?.notes ?: ""
+        )
     }
 
     val mileageNumber = mileage.toIntOrNull()
@@ -84,27 +96,30 @@ fun MaintenanceScreen(
         }
 
         Text(
-            text = "Nuevo mantenimiento",
+            text = if (maintenance == null) {
+                "Nuevo mantenimiento"
+            } else {
+                "Editar mantenimiento"
+            },
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            text = "Registra un servicio realizado a tu vehículo.",
+            text = if (maintenance == null) {
+                "Registra un servicio realizado a tu vehículo."
+            } else {
+                "Modifica los datos del mantenimiento seleccionado."
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         OutlinedTextField(
             value = type,
-            onValueChange = {
-                type = it
-            },
+            onValueChange = { type = it },
             label = {
                 Text("Tipo de mantenimiento")
-            },
-            placeholder = {
-                Text("Ej. Cambio de aceite")
             },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -112,9 +127,7 @@ fun MaintenanceScreen(
 
         OutlinedTextField(
             value = date,
-            onValueChange = {
-                date = it
-            },
+            onValueChange = { date = it },
             label = {
                 Text("Fecha")
             },
@@ -128,9 +141,7 @@ fun MaintenanceScreen(
         OutlinedTextField(
             value = mileage,
             onValueChange = { value ->
-                mileage = value.filter { char ->
-                    char.isDigit()
-                }
+                mileage = value.filter { it.isDigit() }
             },
             label = {
                 Text("Kilometraje del servicio")
@@ -145,9 +156,8 @@ fun MaintenanceScreen(
         OutlinedTextField(
             value = cost,
             onValueChange = { value ->
-
-                cost = value.filter { char ->
-                    char.isDigit() || char == '.'
+                cost = value.filter {
+                    it.isDigit() || it == '.'
                 }
             },
             label = {
@@ -172,10 +182,7 @@ fun MaintenanceScreen(
         OutlinedTextField(
             value = nextMileage,
             onValueChange = { value ->
-
-                nextMileage = value.filter { char ->
-                    char.isDigit()
-                }
+                nextMileage = value.filter { it.isDigit() }
             },
             label = {
                 Text("Próximo kilometraje")
@@ -210,9 +217,6 @@ fun MaintenanceScreen(
             label = {
                 Text("Observaciones")
             },
-            placeholder = {
-                Text("Detalles adicionales del servicio")
-            },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3
         )
@@ -227,6 +231,7 @@ fun MaintenanceScreen(
 
                     onSave(
                         Maintenance(
+                            id = maintenance?.id ?: 0L,
                             vehicleId = vehicleId,
                             type = type.trim(),
                             date = date.trim(),
@@ -243,7 +248,13 @@ fun MaintenanceScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
 
-            Text("Guardar mantenimiento")
+            Text(
+                text = if (maintenance == null) {
+                    "Guardar mantenimiento"
+                } else {
+                    "Guardar cambios"
+                }
+            )
         }
     }
 }
