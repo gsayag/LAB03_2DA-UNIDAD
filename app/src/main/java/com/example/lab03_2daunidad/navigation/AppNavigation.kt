@@ -14,11 +14,13 @@ import com.example.lab03_2daunidad.data.mapper.toDomain
 import com.example.lab03_2daunidad.data.mapper.toEntity
 import com.example.lab03_2daunidad.domain.model.Vehicle
 import com.example.lab03_2daunidad.presentation.home.HomeScreen
+import com.example.lab03_2daunidad.presentation.maintenance.MaintenanceScreen
 import com.example.lab03_2daunidad.presentation.vehicle.VehicleScreen
 import kotlinx.coroutines.launch
 
 private const val HOME_ROUTE = "home"
 private const val VEHICLE_ROUTE = "vehicle"
+private const val MAINTENANCE_ROUTE = "maintenance"
 
 @Composable
 fun AppNavigation() {
@@ -33,6 +35,10 @@ fun AppNavigation() {
 
     val vehicleDao = remember(database) {
         database.vehicleDao()
+    }
+
+    val maintenanceDao = remember(database) {
+        database.maintenanceDao()
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -60,10 +66,18 @@ fun AppNavigation() {
 
             HomeScreen(
                 vehicle = vehicle,
+
                 onVehicleClick = {
 
                     navController.navigate(
                         VEHICLE_ROUTE
+                    )
+                },
+
+                onAddMaintenanceClick = {
+
+                    navController.navigate(
+                        MAINTENANCE_ROUTE
                     )
                 }
             )
@@ -80,6 +94,31 @@ fun AppNavigation() {
 
                         vehicleDao.saveVehicle(
                             updatedVehicle.toEntity()
+                        )
+
+                        navController.popBackStack()
+                    }
+                },
+
+                onBack = {
+
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(MAINTENANCE_ROUTE) {
+
+            MaintenanceScreen(
+                vehicleId = vehicle.id,
+                currentMileage = vehicle.currentMileage,
+
+                onSave = { maintenance ->
+
+                    coroutineScope.launch {
+
+                        maintenanceDao.insertMaintenance(
+                            maintenance.toEntity()
                         )
 
                         navController.popBackStack()

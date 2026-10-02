@@ -25,7 +25,8 @@ import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
 @Composable
 fun HomeScreen(
     vehicle: Vehicle,
-    onVehicleClick: () -> Unit
+    onVehicleClick: () -> Unit,
+    onAddMaintenanceClick: () -> Unit
 ) {
 
     Scaffold { innerPadding ->
@@ -54,6 +55,12 @@ fun HomeScreen(
                 vehicle = vehicle,
                 onVehicleClick = onVehicleClick
             )
+            Button(
+                onClick = onAddMaintenanceClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("+ Registrar mantenimiento")
+            }
 
             Text(
                 text = "Estado general",
@@ -237,7 +244,8 @@ private fun HomeScreenPreview() {
                 plate = "ABC-123",
                 currentMileage = 45240
             ),
-            onVehicleClick = {}
+            onVehicleClick = {},
+            onAddMaintenanceClick = {}
         )
     }
 }
