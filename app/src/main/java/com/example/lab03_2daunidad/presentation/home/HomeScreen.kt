@@ -26,6 +26,7 @@ import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
 import com.example.lab03_2daunidad.domain.model.Vehicle
 import com.example.lab03_2daunidad.domain.util.calculateStatus
 import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
+import com.example.lab03_2daunidad.domain.util.calculateStatusInfo
 
 @Composable
 fun HomeScreen(
@@ -315,6 +316,11 @@ private fun MaintenanceCard(
     currentMileage: Int
 ) {
 
+    val statusInfo =
+        maintenance.calculateStatusInfo(
+            currentMileage = currentMileage
+        )
+
     val statusText =
         when (status) {
 
@@ -349,21 +355,10 @@ private fun MaintenanceCard(
                 fontWeight = FontWeight.SemiBold
             )
 
-            maintenance.nextMileage?.let {
-                    nextMileage ->
-
-                val difference =
-                    nextMileage - currentMileage
-
-                Text(
-                    text =
-                        if (difference > 0) {
-                            "Faltan $difference km"
-                        } else {
-                            "Vencido por ${-difference} km"
-                        }
-                )
-            }
+            Text(
+                text = statusInfo.message,
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             if (
                 maintenance.nextDate.isNotBlank()
@@ -371,12 +366,22 @@ private fun MaintenanceCard(
 
                 Text(
                     text =
-                        "Próxima fecha: ${maintenance.nextDate}"
+                        "Próxima fecha: ${maintenance.nextDate}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            maintenance.nextMileage?.let {
+
+                Text(
+                    text = "Próximo kilometraje: $it km",
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

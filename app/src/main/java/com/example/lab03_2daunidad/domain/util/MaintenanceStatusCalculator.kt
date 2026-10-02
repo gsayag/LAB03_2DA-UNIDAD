@@ -2,6 +2,7 @@ package com.example.lab03_2daunidad.domain.util
 
 import com.example.lab03_2daunidad.domain.model.Maintenance
 import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
+import com.example.lab03_2daunidad.domain.model.MaintenanceStatusInfo
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -14,6 +15,17 @@ fun Maintenance.calculateStatus(
     currentMileage: Int,
     today: LocalDate = LocalDate.now()
 ): MaintenanceStatus {
+
+    return calculateStatusInfo(
+        currentMileage = currentMileage,
+        today = today
+    ).status
+}
+
+fun Maintenance.calculateStatusInfo(
+    currentMileage: Int,
+    today: LocalDate = LocalDate.now()
+): MaintenanceStatusInfo {
 
     val mileageDifference =
         nextMileage?.minus(currentMileage)
@@ -29,35 +41,82 @@ fun Maintenance.calculateStatus(
             )
         }
 
+    // Vencido por kilometraje
     if (
         mileageDifference != null &&
         mileageDifference <= 0
     ) {
-        return MaintenanceStatus.OVERDUE
+
+        return MaintenanceStatusInfo(
+            status = MaintenanceStatus.OVERDUE,
+            message = "Vencido por ${-mileageDifference} km"
+        )
     }
 
+    // Vencido por fecha
     if (
         daysDifference != null &&
         daysDifference < 0
     ) {
-        return MaintenanceStatus.OVERDUE
+
+        return MaintenanceStatusInfo(
+            status = MaintenanceStatus.OVERDUE,
+            message = "Vencido por fecha hace ${-daysDifference} día(s)"
+        )
     }
 
+    // Próximo por kilometraje
     if (
         mileageDifference != null &&
         mileageDifference <= 1000
     ) {
-        return MaintenanceStatus.UPCOMING
+
+        return MaintenanceStatusInfo(
+            status = MaintenanceStatus.UPCOMING,
+            message = "Faltan $mileageDifference km"
+        )
     }
 
+    // Próximo por fecha
     if (
         daysDifference != null &&
         daysDifference <= 30
     ) {
-        return MaintenanceStatus.UPCOMING
+
+        return MaintenanceStatusInfo(
+            status = MaintenanceStatus.UPCOMING,
+            message = "Faltan $daysDifference día(s)"
+        )
     }
 
-    return MaintenanceStatus.OK
+    // Al día por kilometraje
+    if (
+        mileageDifference != null &&
+        mileageDifference > 1000
+    ) {
+
+        return MaintenanceStatusInfo(
+            status = MaintenanceStatus.OK,
+            message = "Faltan $mileageDifference km"
+        )
+    }
+
+    // Al día por fecha
+    if (
+        daysDifference != null &&
+        daysDifference > 30
+    ) {
+
+        return MaintenanceStatusInfo(
+            status = MaintenanceStatus.OK,
+            message = "Faltan $daysDifference día(s)"
+        )
+    }
+
+    return MaintenanceStatusInfo(
+        status = MaintenanceStatus.OK,
+        message = "Sin próximo mantenimiento definido"
+    )
 }
 
 private fun parseDate(

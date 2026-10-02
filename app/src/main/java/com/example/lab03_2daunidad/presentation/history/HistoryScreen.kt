@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.lab03_2daunidad.domain.model.Maintenance
 import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
 import com.example.lab03_2daunidad.domain.util.calculateStatus
+import com.example.lab03_2daunidad.domain.util.calculateStatusInfo
 
 private enum class HistoryFilter {
     ALL,
@@ -237,10 +238,12 @@ private fun MaintenanceHistoryCard(
     onDelete: () -> Unit
 ) {
 
-    val status =
-        maintenance.calculateStatus(
+    val statusInfo =
+        maintenance.calculateStatusInfo(
             currentMileage = currentMileage
         )
+
+    val status = statusInfo.status
 
     val statusText =
         when (status) {
@@ -261,8 +264,7 @@ private fun MaintenanceHistoryCard(
 
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement =
-                Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
 
             Text(
@@ -277,48 +279,51 @@ private fun MaintenanceHistoryCard(
             )
 
             Text(
+                text = statusInfo.message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
                 text = "Fecha: ${maintenance.date}"
             )
 
             Text(
-                text =
-                    "Kilometraje: ${maintenance.mileage} km"
+                text = "Kilometraje: ${maintenance.mileage} km"
             )
 
             Text(
-                text =
-                    "Costo: S/ %.2f".format(
-                        maintenance.cost
-                    )
+                text = "Costo: S/ %.2f".format(
+                    maintenance.cost
+                )
             )
 
-            maintenance.nextMileage?.let {
+            maintenance.nextMileage?.let { nextMileage ->
+
                 Text(
-                    text = "Próximo: $it km"
+                    text = "Próximo kilometraje: $nextMileage km"
                 )
             }
 
             if (maintenance.nextDate.isNotBlank()) {
+
                 Text(
-                    text =
-                        "Próxima fecha: ${maintenance.nextDate}"
+                    text = "Próxima fecha: ${maintenance.nextDate}"
                 )
             }
 
             if (maintenance.notes.isNotBlank()) {
+
                 Text(
                     text = maintenance.notes,
-                    style =
-                        MaterialTheme.typography.bodySmall,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement =
-                    Arrangement.End
+                horizontalArrangement = Arrangement.End
             ) {
 
                 TextButton(
