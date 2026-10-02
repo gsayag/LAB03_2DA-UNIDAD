@@ -28,7 +28,6 @@ private const val HISTORY_ROUTE = "history"
 fun AppNavigation() {
 
     val navController = rememberNavController()
-
     val context = LocalContext.current
 
     val database = remember(context) {
@@ -142,6 +141,16 @@ fun AppNavigation() {
 
             HistoryScreen(
                 maintenances = maintenances,
+
+                onDelete = { maintenance ->
+
+                    coroutineScope.launch {
+
+                        maintenanceDao.deleteMaintenance(
+                            maintenance.toEntity()
+                        )
+                    }
+                },
 
                 onBack = {
                     navController.popBackStack()

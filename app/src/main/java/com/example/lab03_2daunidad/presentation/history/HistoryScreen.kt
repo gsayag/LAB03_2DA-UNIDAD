@@ -2,6 +2,7 @@ package com.example.lab03_2daunidad.presentation.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import com.example.lab03_2daunidad.domain.model.Maintenance
 @Composable
 fun HistoryScreen(
     maintenances: List<Maintenance>,
+    onDelete: (Maintenance) -> Unit,
     onBack: () -> Unit
 ) {
 
@@ -72,7 +74,10 @@ fun HistoryScreen(
                 ) { maintenance ->
 
                     MaintenanceHistoryCard(
-                        maintenance = maintenance
+                        maintenance = maintenance,
+                        onDelete = {
+                            onDelete(maintenance)
+                        }
                     )
                 }
             }
@@ -82,7 +87,8 @@ fun HistoryScreen(
 
 @Composable
 private fun MaintenanceHistoryCard(
-    maintenance: Maintenance
+    maintenance: Maintenance,
+    onDelete: () -> Unit
 ) {
 
     Card(
@@ -101,43 +107,47 @@ private fun MaintenanceHistoryCard(
             )
 
             Text(
-                text = "Fecha: ${maintenance.date}",
-                style = MaterialTheme.typography.bodyMedium
+                text = "Fecha: ${maintenance.date}"
             )
 
             Text(
-                text = "Kilometraje: ${maintenance.mileage} km",
-                style = MaterialTheme.typography.bodyMedium
+                text = "Kilometraje: ${maintenance.mileage} km"
             )
 
             Text(
-                text = "Costo: S/ %.2f".format(maintenance.cost),
-                style = MaterialTheme.typography.bodyMedium
+                text = "Costo: S/ %.2f".format(maintenance.cost)
             )
 
             if (maintenance.nextMileage != null) {
-
                 Text(
-                    text = "Próximo: ${maintenance.nextMileage} km",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Próximo: ${maintenance.nextMileage} km"
                 )
             }
 
             if (maintenance.nextDate.isNotBlank()) {
-
                 Text(
-                    text = "Próxima fecha: ${maintenance.nextDate}",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Próxima fecha: ${maintenance.nextDate}"
                 )
             }
 
             if (maintenance.notes.isNotBlank()) {
-
                 Text(
                     text = maintenance.notes,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+
+                TextButton(
+                    onClick = onDelete
+                ) {
+                    Text("Eliminar")
+                }
             }
         }
     }
