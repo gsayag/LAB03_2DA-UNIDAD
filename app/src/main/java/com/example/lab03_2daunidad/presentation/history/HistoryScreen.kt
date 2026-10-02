@@ -1,5 +1,6 @@
 package com.example.lab03_2daunidad.presentation.history
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,11 +11,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lab03_2daunidad.domain.model.Maintenance
@@ -31,6 +37,20 @@ import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
 import com.example.lab03_2daunidad.domain.util.calculateStatusInfo
 import com.example.lab03_2daunidad.domain.util.toMileageText
 import com.example.lab03_2daunidad.domain.util.toSolesText
+
+private val AutoCareBlue = Color(0xFF195D6F)
+private val AutoCareBackground = Color(0xFFF7F9FA)
+private val AutoCareText = Color(0xFF172F38)
+private val AutoCareSecondaryText = Color(0xFF6D7D84)
+
+private val WarningBackground = Color(0xFFFFE9E5)
+private val WarningText = Color(0xFFC13B34)
+
+private val UpcomingBackground = Color(0xFFFFF0CF)
+private val UpcomingText = Color(0xFF936000)
+
+private val OkBackground = Color(0xFFE4F4EA)
+private val OkText = Color(0xFF26734D)
 
 private enum class HistoryFilter {
     ALL,
@@ -100,25 +120,38 @@ fun HistoryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .background(AutoCareBackground)
+            .padding(
+                horizontal = 20.dp,
+                vertical = 20.dp
+            )
     ) {
 
         TextButton(
             onClick = onBack
         ) {
-            Text("Volver")
+            Text(
+                text = "← Volver",
+                color = AutoCareBlue,
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         Text(
             text = "Historial",
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = AutoCareText
         )
 
         Text(
             text = "Mantenimientos realizados a tu vehículo",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodyLarge,
+            color = AutoCareSecondaryText,
+            modifier = Modifier.padding(
+                top = 4.dp,
+                bottom = 18.dp
+            )
         )
 
         OutlinedTextField(
@@ -132,10 +165,9 @@ fun HistoryScreen(
             placeholder = {
                 Text("Ej. aceite, frenos, llantas")
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            singleLine = true
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp)
         )
 
         Row(
@@ -149,69 +181,84 @@ fun HistoryScreen(
                 Arrangement.spacedBy(8.dp)
         ) {
 
-            FilterChip(
+            HistoryFilterChip(
+                text = "Todos",
                 selected =
                     selectedFilter == HistoryFilter.ALL,
                 onClick = {
                     selectedFilter =
                         HistoryFilter.ALL
-                },
-                label = {
-                    Text("Todos")
                 }
             )
 
-            FilterChip(
+            HistoryFilterChip(
+                text = "Vencidos",
                 selected =
                     selectedFilter == HistoryFilter.OVERDUE,
                 onClick = {
                     selectedFilter =
                         HistoryFilter.OVERDUE
-                },
-                label = {
-                    Text("Vencidos")
                 }
             )
 
-            FilterChip(
+            HistoryFilterChip(
+                text = "Próximos",
                 selected =
                     selectedFilter == HistoryFilter.UPCOMING,
                 onClick = {
                     selectedFilter =
                         HistoryFilter.UPCOMING
-                },
-                label = {
-                    Text("Próximos")
                 }
             )
 
-            FilterChip(
+            HistoryFilterChip(
+                text = "Al día",
                 selected =
                     selectedFilter == HistoryFilter.OK,
                 onClick = {
                     selectedFilter =
                         HistoryFilter.OK
-                },
-                label = {
-                    Text("Al día")
                 }
             )
         }
 
+        Text(
+            text =
+                if (filteredMaintenances.size == 1) {
+                    "1 mantenimiento"
+                } else {
+                    "${filteredMaintenances.size} mantenimientos"
+                },
+            style = MaterialTheme.typography.bodyMedium,
+            color = AutoCareSecondaryText,
+            modifier = Modifier.padding(
+                top = 14.dp,
+                bottom = 10.dp
+            )
+        )
+
         if (filteredMaintenances.isEmpty()) {
 
-            Text(
-                text = "No se encontraron mantenimientos.",
-                modifier = Modifier.padding(top = 32.dp),
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                )
+            ) {
+
+                Text(
+                    text =
+                        "No se encontraron mantenimientos.",
+                    modifier = Modifier.padding(20.dp),
+                    color = AutoCareSecondaryText
+                )
+            }
 
         } else {
 
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 16.dp),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement =
                     Arrangement.spacedBy(12.dp)
             ) {
@@ -248,15 +295,25 @@ fun HistoryScreen(
                 maintenanceToDelete = null
             },
 
+            shape = RoundedCornerShape(28.dp),
+
             title = {
+
                 Text(
-                    text = "¿Eliminar mantenimiento?"
+                    text =
+                        "¿Eliminar mantenimiento?",
+                    color = AutoCareText,
+                    fontWeight = FontWeight.Bold
                 )
             },
 
             text = {
+
                 Text(
-                    text = "Se eliminará \"${maintenance.type}\" del historial. Esta acción no se puede deshacer."
+                    text =
+                        "Se eliminará \"${maintenance.type}\" del historial. " +
+                                "Esta acción no se puede deshacer.",
+                    color = AutoCareSecondaryText
                 )
             },
 
@@ -266,15 +323,15 @@ fun HistoryScreen(
                     onClick = {
 
                         onDelete(maintenance)
-
                         maintenanceToDelete = null
                     }
                 ) {
 
                     Text(
                         text = "Eliminar",
-                        color =
-                            MaterialTheme.colorScheme.error
+                        color = WarningText,
+                        fontWeight =
+                            FontWeight.SemiBold
                     )
                 }
             },
@@ -287,11 +344,53 @@ fun HistoryScreen(
                     }
                 ) {
 
-                    Text("Cancelar")
+                    Text(
+                        text = "Cancelar",
+                        color = AutoCareBlue,
+                        fontWeight =
+                            FontWeight.SemiBold
+                    )
                 }
             }
         )
     }
+}
+
+@Composable
+private fun HistoryFilterChip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+
+        label = {
+
+            Text(
+                text = text,
+                fontWeight =
+                    if (selected) {
+                        FontWeight.SemiBold
+                    } else {
+                        FontWeight.Normal
+                    }
+            )
+        },
+
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor =
+                Color(0xFFE4F0F3),
+
+            selectedLabelColor =
+                AutoCareBlue,
+
+            labelColor =
+                AutoCareSecondaryText
+        )
+    )
 }
 
 @Composable
@@ -309,85 +408,145 @@ private fun MaintenanceHistoryCard(
 
     val status = statusInfo.status
 
-    val statusText =
-        when (status) {
+    val statusText: String
+    val badgeBackground: Color
+    val badgeText: Color
 
-            MaintenanceStatus.OVERDUE ->
-                "🔴 Vencido"
+    when (status) {
 
-            MaintenanceStatus.UPCOMING ->
-                "🟡 Próximo"
+        MaintenanceStatus.OVERDUE -> {
 
-            MaintenanceStatus.OK ->
-                "🟢 Al día"
+            statusText = "Vencido"
+            badgeBackground = WarningBackground
+            badgeText = WarningText
         }
 
+        MaintenanceStatus.UPCOMING -> {
+
+            statusText = "Próximo"
+            badgeBackground = UpcomingBackground
+            badgeText = UpcomingText
+        }
+
+        MaintenanceStatus.OK -> {
+
+            statusText = "Al día"
+            badgeBackground = OkBackground
+            badgeText = OkText
+        }
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
     ) {
 
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(18.dp),
             verticalArrangement =
-                Arrangement.spacedBy(6.dp)
+                Arrangement.spacedBy(8.dp)
         ) {
 
-            Text(
-                text = maintenance.type,
-                style =
-                    MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.SpaceBetween
+            ) {
 
-            Text(
-                text = statusText,
-                fontWeight = FontWeight.SemiBold
-            )
+                Text(
+                    text = maintenance.type,
+                    style =
+                        MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AutoCareText
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = badgeBackground
+                ) {
+
+                    Text(
+                        text = statusText,
+                        modifier = Modifier.padding(
+                            horizontal = 12.dp,
+                            vertical = 5.dp
+                        ),
+                        color = badgeText,
+                        fontWeight =
+                            FontWeight.SemiBold
+                    )
+                }
+            }
 
             Text(
                 text = statusInfo.message,
-                style =
-                    MaterialTheme.typography.bodySmall,
                 color =
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                    if (
+                        status ==
+                        MaintenanceStatus.OVERDUE
+                    ) {
+                        WarningText
+                    } else {
+                        AutoCareSecondaryText
+                    }
+            )
+
+            Text(
+                text = "Fecha: ${maintenance.date}",
+                color = AutoCareSecondaryText
             )
 
             Text(
                 text =
-                    "Fecha: ${maintenance.date}"
+                    "Kilometraje: ${maintenance.mileage.toMileageText()}",
+                color = AutoCareSecondaryText
             )
 
             Text(
-                text = "Kilometraje: ${maintenance.mileage.toMileageText()}"
+                text =
+                    "Costo: ${maintenance.cost.toSolesText()}",
+                color = AutoCareSecondaryText
             )
 
-            Text(
-                text = "Costo: ${maintenance.cost.toSolesText()}"
-            )
-
-            maintenance.nextMileage?.let { nextMileage ->
-
-                Text(
-                    text = "Próximo kilometraje: ${nextMileage.toMileageText()}"
-                )
-            }
-
-            if (maintenance.nextDate.isNotBlank()) {
+            maintenance.nextMileage?.let {
+                    nextMileage ->
 
                 Text(
                     text =
-                        "Próxima fecha: ${maintenance.nextDate}"
+                        "Próximo kilometraje: ${nextMileage.toMileageText()}",
+                    fontWeight =
+                        FontWeight.SemiBold,
+                    color = AutoCareText
                 )
             }
 
-            if (maintenance.notes.isNotBlank()) {
+            if (
+                maintenance.nextDate.isNotBlank()
+            ) {
+
+                Text(
+                    text =
+                        "Próxima fecha: ${maintenance.nextDate}",
+                    color = AutoCareSecondaryText
+                )
+            }
+
+            if (
+                maintenance.notes.isNotBlank()
+            ) {
 
                 Text(
                     text = maintenance.notes,
                     style =
                         MaterialTheme.typography.bodySmall,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    color = AutoCareSecondaryText
                 )
             }
 
@@ -400,7 +559,11 @@ private fun MaintenanceHistoryCard(
                 TextButton(
                     onClick = onEdit
                 ) {
-                    Text("Editar")
+
+                    Text(
+                        text = "Editar",
+                        color = AutoCareBlue
+                    )
                 }
 
                 TextButton(
@@ -409,8 +572,7 @@ private fun MaintenanceHistoryCard(
 
                     Text(
                         text = "Eliminar",
-                        color =
-                            MaterialTheme.colorScheme.error
+                        color = WarningText
                     )
                 }
             }

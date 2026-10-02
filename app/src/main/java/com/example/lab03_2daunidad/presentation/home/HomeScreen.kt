@@ -1,6 +1,8 @@
 package com.example.lab03_2daunidad.presentation.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,14 +10,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -25,9 +34,23 @@ import com.example.lab03_2daunidad.domain.model.Maintenance
 import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
 import com.example.lab03_2daunidad.domain.model.Vehicle
 import com.example.lab03_2daunidad.domain.util.calculateStatus
-import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
 import com.example.lab03_2daunidad.domain.util.calculateStatusInfo
 import com.example.lab03_2daunidad.domain.util.toMileageText
+import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
+
+private val AutoCareBlue = Color(0xFF195D6F)
+private val AutoCareBackground = Color(0xFFF7F9FA)
+private val AutoCareText = Color(0xFF172F38)
+private val AutoCareSecondaryText = Color(0xFF6D7D84)
+
+private val WarningBackground = Color(0xFFFFE9E5)
+private val WarningText = Color(0xFFC13B34)
+
+private val UpcomingBackground = Color(0xFFFFF0CF)
+private val UpcomingText = Color(0xFF936000)
+
+private val OkBackground = Color(0xFFE4F4EA)
+private val OkText = Color(0xFF26734D)
 
 @Composable
 fun HomeScreen(
@@ -75,25 +98,63 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(AutoCareBackground)
             .verticalScroll(
                 rememberScrollState()
             )
-            .padding(20.dp),
+            .padding(
+                horizontal = 20.dp,
+                vertical = 24.dp
+            ),
         verticalArrangement =
-            Arrangement.spacedBy(16.dp)
+            Arrangement.spacedBy(18.dp)
     ) {
 
-        Text(
-            text = "AutoCare",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement =
+                Arrangement.SpaceBetween,
+            verticalAlignment =
+                Alignment.CenterVertically
+        ) {
 
-        Text(
-            text = "Controla el mantenimiento de tu vehículo",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+            Column {
+
+                Text(
+                    text = "AutoCare",
+                    style =
+                        MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AutoCareText
+                )
+
+                Text(
+                    text =
+                        "Controla el mantenimiento de tu vehículo",
+                    style =
+                        MaterialTheme.typography.bodyMedium,
+                    color = AutoCareSecondaryText
+                )
+            }
+
+            Surface(
+                shape = CircleShape,
+                color = Color(0xFFE5F0F3),
+                modifier = Modifier.size(48.dp)
+            ) {
+
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Text(
+                        text = "AC",
+                        fontWeight = FontWeight.Bold,
+                        color = AutoCareBlue
+                    )
+                }
+            }
+        }
 
         VehicleCard(
             vehicle = vehicle,
@@ -102,22 +163,41 @@ fun HomeScreen(
 
         Button(
             onClick = onAddMaintenanceClick,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AutoCareBlue
+            )
         ) {
-            Text("+ Registrar mantenimiento")
+
+            Text(
+                text = "Registrar mantenimiento",
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
-        Button(
+        OutlinedButton(
             onClick = onHistoryClick,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp)
         ) {
-            Text("Ver historial")
+
+            Text(
+                text = "Ver historial",
+                fontWeight = FontWeight.SemiBold,
+                color = AutoCareBlue
+            )
         }
 
         Text(
             text = "Estado general",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = AutoCareText
         )
 
         GeneralStatusCard(
@@ -128,15 +208,27 @@ fun HomeScreen(
         Text(
             text = "Próximos mantenimientos",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = AutoCareText
         )
 
         if (upcomingMaintenances.isEmpty()) {
 
-            Text(
-                text = "No hay próximos mantenimientos registrados.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                )
+            ) {
+
+                Text(
+                    text =
+                        "No hay próximos mantenimientos registrados.",
+                    modifier = Modifier.padding(20.dp),
+                    color = AutoCareSecondaryText
+                )
+            }
 
         } else {
 
@@ -151,6 +243,10 @@ fun HomeScreen(
                 )
             }
         }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
     }
 }
 
@@ -162,8 +258,12 @@ private fun VehicleCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
+            defaultElevation = 2.dp
         )
     ) {
 
@@ -171,50 +271,89 @@ private fun VehicleCard(
             modifier = Modifier.padding(20.dp)
         ) {
 
-            Text(
-                text = "Mi vehículo",
-                style = MaterialTheme.typography.labelLarge
-            )
+            Row(
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
+
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color(0xFFE5F0F3),
+                    modifier = Modifier.size(52.dp)
+                ) {
+
+                    Box(
+                        contentAlignment =
+                            Alignment.Center
+                    ) {
+
+                        Text(
+                            text = "🚗",
+                            style =
+                                MaterialTheme.typography.titleLarge
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                ) {
+
+                    Text(
+                        text =
+                            "${vehicle.brand} ${vehicle.model}",
+                        style =
+                            MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = AutoCareText
+                    )
+
+                    Text(
+                        text =
+                            "${vehicle.year} • ${vehicle.plate}",
+                        color = AutoCareSecondaryText
+                    )
+                }
+            }
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(18.dp)
+            )
+
+            Text(
+                text = "Kilometraje actual",
+                color = AutoCareSecondaryText
             )
 
             Text(
                 text =
-                    "${vehicle.brand} ${vehicle.model}",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text =
-                    "${vehicle.year} • ${vehicle.plate}"
+                    vehicle.currentMileage.toMileageText(),
+                style =
+                    MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = AutoCareText
             )
 
             Spacer(
-                modifier = Modifier.height(16.dp)
-            )
-
-            Text(
-                text = "Kilometraje actual"
-            )
-
-            Text(
-                text = vehicle.currentMileage.toMileageText(),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.height(18.dp)
             )
 
             Button(
                 onClick = onVehicleClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AutoCareBlue
+                )
             ) {
-                Text("Gestionar vehículo")
+
+                Text(
+                    text = "Gestionar vehículo",
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
@@ -230,6 +369,7 @@ private fun GeneralStatusCard(
     val description: String
     val symbol: String
     val containerColor: Color
+    val textColor: Color
 
     when {
 
@@ -238,12 +378,16 @@ private fun GeneralStatusCard(
             title = "Atención requerida"
 
             description =
-                "$overdueCount mantenimiento(s) vencido(s)"
+                if (overdueCount == 1) {
+                    "1 mantenimiento vencido"
+                } else {
+                    "$overdueCount mantenimientos vencidos"
+                }
 
             symbol = "!"
 
-            containerColor =
-                MaterialTheme.colorScheme.errorContainer
+            containerColor = WarningBackground
+            textColor = WarningText
         }
 
         upcomingCount > 0 -> {
@@ -251,12 +395,16 @@ private fun GeneralStatusCard(
             title = "Próximos mantenimientos"
 
             description =
-                "$upcomingCount mantenimiento(s) próximo(s)"
+                if (upcomingCount == 1) {
+                    "1 mantenimiento próximo"
+                } else {
+                    "$upcomingCount mantenimientos próximos"
+                }
 
             symbol = "!"
 
-            containerColor =
-                MaterialTheme.colorScheme.tertiaryContainer
+            containerColor = UpcomingBackground
+            textColor = UpcomingText
         }
 
         else -> {
@@ -268,13 +416,14 @@ private fun GeneralStatusCard(
 
             symbol = "✓"
 
-            containerColor =
-                MaterialTheme.colorScheme.secondaryContainer
+            containerColor = OkBackground
+            textColor = OkText
         }
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor
         )
@@ -284,27 +433,48 @@ private fun GeneralStatusCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            horizontalArrangement =
-                Arrangement.SpaceBetween
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
 
-            Column {
+            Surface(
+                modifier = Modifier.size(34.dp),
+                shape = CircleShape,
+                color = Color.Transparent
+            ) {
+
+                Box(
+                    contentAlignment =
+                        Alignment.Center
+                ) {
+
+                    Text(
+                        text = symbol,
+                        fontWeight =
+                            FontWeight.Bold,
+                        color = textColor
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .padding(start = 14.dp)
+            ) {
 
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    style =
+                        MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
                 )
 
                 Text(
-                    text = description
+                    text = description,
+                    color = textColor
                 )
             }
-
-            Text(
-                text = symbol,
-                style = MaterialTheme.typography.headlineMedium
-            )
         }
     }
 }
@@ -321,43 +491,88 @@ private fun MaintenanceCard(
             currentMileage = currentMileage
         )
 
-    val statusText =
-        when (status) {
+    val statusText: String
+    val badgeBackground: Color
+    val badgeTextColor: Color
 
-            MaintenanceStatus.OVERDUE ->
-                "🔴 Vencido"
+    when (status) {
 
-            MaintenanceStatus.UPCOMING ->
-                "🟡 Próximo"
+        MaintenanceStatus.OVERDUE -> {
 
-            MaintenanceStatus.OK ->
-                "🟢 Al día"
+            statusText = "Vencido"
+            badgeBackground = WarningBackground
+            badgeTextColor = WarningText
         }
 
+        MaintenanceStatus.UPCOMING -> {
+
+            statusText = "Próximo"
+            badgeBackground = UpcomingBackground
+            badgeTextColor = UpcomingText
+        }
+
+        MaintenanceStatus.OK -> {
+
+            statusText = "Al día"
+            badgeBackground = OkBackground
+            badgeTextColor = OkText
+        }
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
     ) {
 
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             verticalArrangement =
-                Arrangement.spacedBy(4.dp)
+                Arrangement.spacedBy(8.dp)
         ) {
 
-            Text(
-                text = maintenance.type,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.SpaceBetween,
+                verticalAlignment =
+                    Alignment.CenterVertically
+            ) {
 
-            Text(
-                text = statusText,
-                fontWeight = FontWeight.SemiBold
-            )
+                Text(
+                    text = maintenance.type,
+                    style =
+                        MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AutoCareText
+                )
+
+                Surface(
+                    color = badgeBackground,
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+
+                    Text(
+                        text = statusText,
+                        modifier = Modifier.padding(
+                            horizontal = 12.dp,
+                            vertical = 6.dp
+                        ),
+                        fontWeight =
+                            FontWeight.SemiBold,
+                        color = badgeTextColor
+                    )
+                }
+            }
 
             Text(
                 text = statusInfo.message,
-                style = MaterialTheme.typography.bodyMedium
+                color = AutoCareSecondaryText
             )
 
             if (
@@ -367,21 +582,25 @@ private fun MaintenanceCard(
                 Text(
                     text =
                         "Próxima fecha: ${maintenance.nextDate}",
-                    style = MaterialTheme.typography.bodySmall
+                    style =
+                        MaterialTheme.typography.bodyMedium,
+                    color = badgeTextColor
                 )
             }
 
             maintenance.nextMileage?.let {
 
                 Text(
-                    text = "Próximo kilometraje: ${it.toMileageText()}",
-                    style = MaterialTheme.typography.bodySmall
+                    text =
+                        "Próximo kilometraje: ${it.toMileageText()}",
+                    style =
+                        MaterialTheme.typography.bodyMedium,
+                    color = badgeTextColor
                 )
             }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -403,6 +622,12 @@ private fun HomeScreenPreview() {
                     type = "Cambio de aceite",
                     nextMileage = 57000,
                     nextDate = "15/10/2026"
+                ),
+                Maintenance(
+                    id = 2,
+                    type = "Revisión de llantas",
+                    nextMileage = 58000,
+                    nextDate = "12/09/2026"
                 )
             ),
             onVehicleClick = {},
