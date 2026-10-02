@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
+import com.example.lab03_2daunidad.domain.util.toMileageText
 
 private val dateFormatter =
     DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -49,7 +50,8 @@ fun Maintenance.calculateStatusInfo(
 
         return MaintenanceStatusInfo(
             status = MaintenanceStatus.OVERDUE,
-            message = "Vencido por ${-mileageDifference} km"
+            message =
+                "Vencido por ${(-mileageDifference).toMileageText()}"
         )
     }
 
@@ -73,7 +75,8 @@ fun Maintenance.calculateStatusInfo(
 
         return MaintenanceStatusInfo(
             status = MaintenanceStatus.UPCOMING,
-            message = "Faltan $mileageDifference km"
+            message =
+                "Faltan ${mileageDifference.toMileageText()}"
         )
     }
 

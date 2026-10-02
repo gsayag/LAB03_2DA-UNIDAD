@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import com.example.lab03_2daunidad.domain.model.Maintenance
 import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
 import com.example.lab03_2daunidad.domain.util.calculateStatusInfo
+import com.example.lab03_2daunidad.domain.util.toMileageText
+import com.example.lab03_2daunidad.domain.util.toSolesText
 
 private enum class HistoryFilter {
     ALL,
@@ -356,23 +358,17 @@ private fun MaintenanceHistoryCard(
             )
 
             Text(
-                text =
-                    "Kilometraje: ${maintenance.mileage} km"
+                text = "Kilometraje: ${maintenance.mileage.toMileageText()}"
             )
 
             Text(
-                text =
-                    "Costo: S/ %.2f".format(
-                        maintenance.cost
-                    )
+                text = "Costo: ${maintenance.cost.toSolesText()}"
             )
 
-            maintenance.nextMileage?.let {
-                    nextMileage ->
+            maintenance.nextMileage?.let { nextMileage ->
 
                 Text(
-                    text =
-                        "Próximo kilometraje: $nextMileage km"
+                    text = "Próximo kilometraje: ${nextMileage.toMileageText()}"
                 )
             }
 

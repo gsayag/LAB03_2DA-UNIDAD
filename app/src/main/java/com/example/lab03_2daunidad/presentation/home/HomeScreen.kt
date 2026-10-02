@@ -27,6 +27,7 @@ import com.example.lab03_2daunidad.domain.model.Vehicle
 import com.example.lab03_2daunidad.domain.util.calculateStatus
 import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
 import com.example.lab03_2daunidad.domain.util.calculateStatusInfo
+import com.example.lab03_2daunidad.domain.util.toMileageText
 
 @Composable
 fun HomeScreen(
@@ -200,8 +201,7 @@ private fun VehicleCard(
             )
 
             Text(
-                text =
-                    "${vehicle.currentMileage} km",
+                text = vehicle.currentMileage.toMileageText(),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -374,7 +374,7 @@ private fun MaintenanceCard(
             maintenance.nextMileage?.let {
 
                 Text(
-                    text = "Próximo kilometraje: $it km",
+                    text = "Próximo kilometraje: ${it.toMileageText()}",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
