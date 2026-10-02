@@ -76,6 +76,7 @@ fun AppNavigation() {
 
             HomeScreen(
                 vehicle = vehicle,
+                maintenances = maintenances,
 
                 onVehicleClick = {
                     navController.navigate(VEHICLE_ROUTE)

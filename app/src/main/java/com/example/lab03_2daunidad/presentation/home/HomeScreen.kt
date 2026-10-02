@@ -8,90 +8,146 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.lab03_2daunidad.domain.model.Maintenance
+import com.example.lab03_2daunidad.domain.model.MaintenanceStatus
 import com.example.lab03_2daunidad.domain.model.Vehicle
+import com.example.lab03_2daunidad.domain.util.calculateStatus
 import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
 
 @Composable
 fun HomeScreen(
     vehicle: Vehicle,
+    maintenances: List<Maintenance>,
     onVehicleClick: () -> Unit,
     onAddMaintenanceClick: () -> Unit,
     onHistoryClick: () -> Unit
 ) {
 
-    Scaffold { innerPadding ->
+    val maintenancesWithStatus =
+        maintenances.map { maintenance ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            Text(
-                text = "AutoCare",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+            maintenance to maintenance.calculateStatus(
+                currentMileage = vehicle.currentMileage
             )
+        }
+
+    val overdueCount =
+        maintenancesWithStatus.count {
+            it.second == MaintenanceStatus.OVERDUE
+        }
+
+    val upcomingCount =
+        maintenancesWithStatus.count {
+            it.second == MaintenanceStatus.UPCOMING
+        }
+
+    val upcomingMaintenances =
+        maintenancesWithStatus
+            .filter {
+                it.first.nextMileage != null ||
+                        it.first.nextDate.isNotBlank()
+            }
+            .sortedBy { pair ->
+
+                when (pair.second) {
+                    MaintenanceStatus.OVERDUE -> 0
+                    MaintenanceStatus.UPCOMING -> 1
+                    MaintenanceStatus.OK -> 2
+                }
+            }
+            .take(3)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(
+                rememberScrollState()
+            )
+            .padding(20.dp),
+        verticalArrangement =
+            Arrangement.spacedBy(16.dp)
+    ) {
+
+        Text(
+            text = "AutoCare",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "Controla el mantenimiento de tu vehículo",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        VehicleCard(
+            vehicle = vehicle,
+            onVehicleClick = onVehicleClick
+        )
+
+        Button(
+            onClick = onAddMaintenanceClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("+ Registrar mantenimiento")
+        }
+
+        Button(
+            onClick = onHistoryClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Ver historial")
+        }
+
+        Text(
+            text = "Estado general",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+
+        GeneralStatusCard(
+            overdueCount = overdueCount,
+            upcomingCount = upcomingCount
+        )
+
+        Text(
+            text = "Próximos mantenimientos",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+
+        if (upcomingMaintenances.isEmpty()) {
 
             Text(
-                text = "Controla el mantenimiento de tu vehículo",
-                style = MaterialTheme.typography.bodyMedium,
+                text = "No hay próximos mantenimientos registrados.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            VehicleCard(
-                vehicle = vehicle,
-                onVehicleClick = onVehicleClick
-            )
-            Button(
-                onClick = onAddMaintenanceClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("+ Registrar mantenimiento")
+        } else {
+
+            upcomingMaintenances.forEach {
+                    (maintenance, status) ->
+
+                MaintenanceCard(
+                    maintenance = maintenance,
+                    status = status,
+                    currentMileage =
+                        vehicle.currentMileage
+                )
             }
-            Button(
-                onClick = onHistoryClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver historial")
-            }
-
-            Text(
-                text = "Estado general",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            StatusCard()
-
-            Text(
-                text = "Próximos mantenimientos",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            MaintenanceCard(
-                title = "Cambio de aceite",
-                description = "Faltan 1,760 km"
-            )
-
-            MaintenanceCard(
-                title = "Revisión de frenos",
-                description = "Próxima revisión: 15/11/2026"
-            )
         }
     }
 }
@@ -123,14 +179,15 @@ private fun VehicleCard(
             )
 
             Text(
-                text = "${vehicle.brand} ${vehicle.model}",
+                text =
+                    "${vehicle.brand} ${vehicle.model}",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = "${vehicle.year} • ${vehicle.plate}",
-                style = MaterialTheme.typography.bodyMedium
+                text =
+                    "${vehicle.year} • ${vehicle.plate}"
             )
 
             Spacer(
@@ -138,12 +195,12 @@ private fun VehicleCard(
             )
 
             Text(
-                text = "Kilometraje actual",
-                style = MaterialTheme.typography.bodyMedium
+                text = "Kilometraje actual"
             )
 
             Text(
-                text = "${vehicle.currentMileage} km",
+                text =
+                    "${vehicle.currentMileage} km",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -156,22 +213,69 @@ private fun VehicleCard(
                 onClick = onVehicleClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-
-                Text(
-                    text = "Gestionar vehículo"
-                )
+                Text("Gestionar vehículo")
             }
         }
     }
 }
 
 @Composable
-private fun StatusCard() {
+private fun GeneralStatusCard(
+    overdueCount: Int,
+    upcomingCount: Int
+) {
+
+    val title: String
+    val description: String
+    val symbol: String
+    val containerColor: Color
+
+    when {
+
+        overdueCount > 0 -> {
+
+            title = "Atención requerida"
+
+            description =
+                "$overdueCount mantenimiento(s) vencido(s)"
+
+            symbol = "!"
+
+            containerColor =
+                MaterialTheme.colorScheme.errorContainer
+        }
+
+        upcomingCount > 0 -> {
+
+            title = "Próximos mantenimientos"
+
+            description =
+                "$upcomingCount mantenimiento(s) próximo(s)"
+
+            symbol = "!"
+
+            containerColor =
+                MaterialTheme.colorScheme.tertiaryContainer
+        }
+
+        else -> {
+
+            title = "Vehículo al día"
+
+            description =
+                "No tienes mantenimientos vencidos"
+
+            symbol = "✓"
+
+            containerColor =
+                MaterialTheme.colorScheme.secondaryContainer
+        }
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = containerColor
         )
     ) {
 
@@ -179,25 +283,25 @@ private fun StatusCard() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement =
+                Arrangement.SpaceBetween
         ) {
 
             Column {
 
                 Text(
-                    text = "Vehículo al día",
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
 
                 Text(
-                    text = "No tienes mantenimientos vencidos",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = description
                 )
             }
 
             Text(
-                text = "✓",
+                text = symbol,
                 style = MaterialTheme.typography.headlineMedium
             )
         }
@@ -206,33 +310,70 @@ private fun StatusCard() {
 
 @Composable
 private fun MaintenanceCard(
-    title: String,
-    description: String
+    maintenance: Maintenance,
+    status: MaintenanceStatus,
+    currentMileage: Int
 ) {
+
+    val statusText =
+        when (status) {
+
+            MaintenanceStatus.OVERDUE ->
+                "🔴 Vencido"
+
+            MaintenanceStatus.UPCOMING ->
+                "🟡 Próximo"
+
+            MaintenanceStatus.OK ->
+                "🟢 Al día"
+        }
 
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
 
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(4.dp)
         ) {
 
             Text(
-                text = title,
+                text = maintenance.type,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(
-                modifier = Modifier.height(4.dp)
+                fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = statusText,
+                fontWeight = FontWeight.SemiBold
             )
+
+            maintenance.nextMileage?.let {
+                    nextMileage ->
+
+                val difference =
+                    nextMileage - currentMileage
+
+                Text(
+                    text =
+                        if (difference > 0) {
+                            "Faltan $difference km"
+                        } else {
+                            "Vencido por ${-difference} km"
+                        }
+                )
+            }
+
+            if (
+                maintenance.nextDate.isNotBlank()
+            ) {
+
+                Text(
+                    text =
+                        "Próxima fecha: ${maintenance.nextDate}"
+                )
+            }
         }
     }
 }
@@ -249,7 +390,15 @@ private fun HomeScreenPreview() {
                 model = "Corolla",
                 year = 2020,
                 plate = "ABC-123",
-                currentMileage = 45240
+                currentMileage = 56000
+            ),
+            maintenances = listOf(
+                Maintenance(
+                    id = 1,
+                    type = "Cambio de aceite",
+                    nextMileage = 57000,
+                    nextDate = "15/10/2026"
+                )
             ),
             onVehicleClick = {},
             onAddMaintenanceClick = {},
