@@ -13,6 +13,7 @@ import com.example.lab03_2daunidad.data.local.AutoCareDatabase
 import com.example.lab03_2daunidad.data.mapper.toDomain
 import com.example.lab03_2daunidad.data.mapper.toEntity
 import com.example.lab03_2daunidad.domain.model.Vehicle
+import com.example.lab03_2daunidad.presentation.history.HistoryScreen
 import com.example.lab03_2daunidad.presentation.home.HomeScreen
 import com.example.lab03_2daunidad.presentation.maintenance.MaintenanceScreen
 import com.example.lab03_2daunidad.presentation.vehicle.VehicleScreen
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 private const val HOME_ROUTE = "home"
 private const val VEHICLE_ROUTE = "vehicle"
 private const val MAINTENANCE_ROUTE = "maintenance"
+private const val HISTORY_ROUTE = "history"
 
 @Composable
 fun AppNavigation() {
@@ -57,6 +59,14 @@ fun AppNavigation() {
             currentMileage = 45240
         )
 
+    val maintenanceEntities by maintenanceDao
+        .observeMaintenances(vehicle.id)
+        .collectAsState(initial = emptyList())
+
+    val maintenances = maintenanceEntities.map { entity ->
+        entity.toDomain()
+    }
+
     NavHost(
         navController = navController,
         startDestination = HOME_ROUTE
@@ -68,17 +78,15 @@ fun AppNavigation() {
                 vehicle = vehicle,
 
                 onVehicleClick = {
-
-                    navController.navigate(
-                        VEHICLE_ROUTE
-                    )
+                    navController.navigate(VEHICLE_ROUTE)
                 },
 
                 onAddMaintenanceClick = {
+                    navController.navigate(MAINTENANCE_ROUTE)
+                },
 
-                    navController.navigate(
-                        MAINTENANCE_ROUTE
-                    )
+                onHistoryClick = {
+                    navController.navigate(HISTORY_ROUTE)
                 }
             )
         }
@@ -101,7 +109,6 @@ fun AppNavigation() {
                 },
 
                 onBack = {
-
                     navController.popBackStack()
                 }
             )
@@ -126,7 +133,17 @@ fun AppNavigation() {
                 },
 
                 onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
 
+        composable(HISTORY_ROUTE) {
+
+            HistoryScreen(
+                maintenances = maintenances,
+
+                onBack = {
                     navController.popBackStack()
                 }
             )

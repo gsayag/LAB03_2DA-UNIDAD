@@ -26,7 +26,8 @@ import com.example.lab03_2daunidad.ui.theme.LAB032DAUNIDADTheme
 fun HomeScreen(
     vehicle: Vehicle,
     onVehicleClick: () -> Unit,
-    onAddMaintenanceClick: () -> Unit
+    onAddMaintenanceClick: () -> Unit,
+    onHistoryClick: () -> Unit
 ) {
 
     Scaffold { innerPadding ->
@@ -60,6 +61,12 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("+ Registrar mantenimiento")
+            }
+            Button(
+                onClick = onHistoryClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver historial")
             }
 
             Text(
@@ -245,7 +252,8 @@ private fun HomeScreenPreview() {
                 currentMileage = 45240
             ),
             onVehicleClick = {},
-            onAddMaintenanceClick = {}
+            onAddMaintenanceClick = {},
+            onHistoryClick = {}
         )
     }
 }
