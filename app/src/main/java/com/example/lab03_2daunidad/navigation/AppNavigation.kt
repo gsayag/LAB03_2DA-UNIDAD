@@ -143,6 +143,7 @@ fun AppNavigation() {
 
             HistoryScreen(
                 maintenances = maintenances,
+                currentMileage = vehicle.currentMileage,
 
                 onEdit = { maintenance ->
 
